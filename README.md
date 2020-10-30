@@ -61,10 +61,15 @@ Commit your code regularly and meaningfully. This helps both you (in case you ev
 Be prepared to demonstrate your understanding of this week's concepts by answering questions on the following topics. You might prepare by writing down your own answers before hand.
 
 1. The core features of Node.js and Express and why they are useful.
+`Node.js helps Javascript enable to work on backend, Express.js is useful mostly because makes easy to use Node.js and provides a great tool of middleware and router`
 1. Understand and explain the use of Middleware?
+`Usually to validate some info from the request before we actually get into database`
 1. The basic principles of the REST architectural style.
+`REST architectural style is a writing convention of endpoints, for example, GET '/unit/:id/students`
 1. Understand and explain the use of Express Routers.
+`Express router provides a router that associated with certain endpoints. Whenever a client makes a certain API request, depends on how URL looks like, the will invoke a router to run the request. Router can be used in anywhere such like components in React.`
 1. Describe tooling used to manually test the correctness of an API.
+`It can be a middleware of the validation API or third party library such like morgan can help to test if the api is correct.`
 
 You are expected to be able to answer questions in these areas. Your responses contribute to your Sprint Challenge grade.
 
