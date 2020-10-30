@@ -22,82 +22,48 @@ router.get('/', (req, res) => {
 })
 
 // GET specific project with all actions
-router.get('/:id', (req, res) => {
-   const { id } = req.params
+router.get('/:id', validateProjectId, (req, res) => {
 
-   if(!id){
-      res.status(404).json({
-         message: 'The project with the specificed id does not exist'
-      })
-   } else {
-      Project.get(id)
-      .then(projects => {
-         res.status(200).json({
-            data: projects
-         })
-      })
-      .catch(error => {
-         res.status(500).json({
-            error: 'The projects could not be retrieved'
-         })
-      })
-   }
+   res.status(200).json({ projects: req.project })
+   
 })
 
 // POST add project
-router.post('/', (req, res) => {
-   const { name, description } = req.body
+router.post('/', validateProject, (req, res) => {
+
    const newProject = req.body
 
-   if(!name || !description){
-      res.status(400).json({
-         errorMessage: "Please provide title and contents for the post."
+   Project.insert(newProject)
+      .then(project => {
+         res.status(201).json(project)
       })
-   } else {
-      Project.insert(newProject)
-         .then(project => {
-            res.status(201).json(project)
+      .catch(error => {
+         res.status(500).json({ 
+            error: "There was an error while saving the project to the database" 
          })
-         .catch(error => {
-            res.status(500).json({ 
-               error: "There was an error while saving the project to the database" 
-            })
-         })
-   }
+      })
 })
 
 // POST add actions at specific project
-router.post('/:id/actions', (req, res) => {
-   const { project_id , description, notes } = req.body
-   const newAction = req.body
-   console.log(newAction)
+router.post('/:id/actions', validateProjectId, validateAction, (req, res) => {
 
-   if(!project_id || !description){
-      res.status(400).json({
-         errorMessage: "Please provide project_id and description for the post."
+   const newAction = req.body
+ 
+   Action.insert(newAction)
+      .then(action => {
+         res.status(201).json(action)
       })
-   } else {
-      Action.insert(newAction)
-         .then(action => {
-            res.status(201).json(action)
+      .catch(error => {
+         res.status(500).json({ 
+            error: "There was an error while saving the action to the database" 
          })
-         .catch(error => {
-            res.status(500).json({ 
-               error: "There was an error while saving the action to the database" 
-            })
-         })
-   }
+      })
 })
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateProjectId, (req, res) => {
 
    const { id } = req.params
 
-   if(!id){
-      res.status(404).json({
-         message: "The project with the specified ID does not exist."
-      })
-   } else {
       Project.remove(id)
          .then(data => {
             res.status(201).json({
@@ -109,35 +75,73 @@ router.delete('/:id', (req, res) => {
                error: 'The project could not be removed.'
             })
          })
-   }
 })
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateProjectId, validateProjectId, (req, res) => {
    const { id } = req.params
-   const { name, description } = req.body
    const updateProject = req.body
 
-   if(!id){
-      res.status(400).json({
-         message: 'The post with the specified id does not exist.'
-      })
-   } else if(!name || !description){
-      res.status(400).json({
-         errorMessage: 'Please provide name and description correctly'
-      })
-   } else {
 
-      Project.update(id, updateProject)
-         .then(updated => {
-            res.status(201).json(updated)
+   Project.update(id, updateProject)
+      .then(updated => {
+         res.status(201).json(updated)
+      })
+      .catch(error => {
+         res.status(500).json({
+            message: 'Something went wrong!!'
          })
-         .catch(error => {
-            res.status(500).json({
-               message: 'Something went wrong!!'
-            })
-         })
-   }
+      })
+
 })
 
-
+function validateProjectId(req, res, next) {
+   // do your magic!
+   const { id } = req.params
+ 
+   Project.get(id)
+     .then(project => { 
+ 
+       if(project){
+         console.log('project is exist: ', project)
+         req.project = project
+ 
+         next()
+       } else {
+         console.log('project is undefined')
+         res.status(404).json({
+            message: 'The id associate with project does not exist.'
+         })
+       }
+     })
+     .catch(error => {
+ 
+       next({ code: 500, message: 'Something crashed and burned' })
+     })
+}
+function validateAction(req, res, next) {
+   // do your magic!
+   const { notes, description } = req.body
+ 
+   if(!notes || !description){
+     res.status(404).json({
+       message: 'Please provide correct notes or description format'
+     })
+   } else {
+     next()
+   }
+   
+}
+function validateProject(req, res, next) {
+   // do your magic!
+   const { name, description } = req.body
+ 
+   if(!name || !description){
+     res.status(404).json({
+       message: 'Please provide correct name or description format'
+     })
+   } else {
+     next()
+   }
+   
+}
 module.exports = router
